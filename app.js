@@ -4,7 +4,7 @@ const path = require("path");
 const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 const app = express();
-
+app.use(express.json());
 const dbPath = path.join(__dirname, "todoApplication.db");
 
 let db = null;
@@ -31,7 +31,7 @@ app.get("/todos/", async (request, response) => {
     SELECT
       *
     FROM
-     Todo
+     todo
     WHERE
      todo LIKE '%${search_q}%';`;
   const todosArray = await db.all(getTodosQuery);
@@ -43,9 +43,23 @@ app.get("/todos/", async (request, response) => {
     SELECT
       *
     FROM
-     Todo
+     todo
     WHERE
      priority LIKE '%${search_q}%';`;
   const todosArray = await db.all(getTodosQuery);
   response.send(todosArray);
 });
+app.get("/todos/", async (request, response) => {
+  const { search_q = "", status = "", priority = "" } = request.query;
+  const getTodosQuery = `
+    SELECT
+      *
+    FROM
+     todo
+    WHERE
+     priority LIKE '%${search_q}%',
+     status LIKE '%${search_q}%';`;
+  const todosArray = await db.all(getTodosQuery);
+  response.send(todosArray);
+});
+module.exports = app;
